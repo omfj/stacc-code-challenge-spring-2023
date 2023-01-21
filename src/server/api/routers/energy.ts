@@ -7,6 +7,16 @@ const HOURS_IN_DAY = 24;
 const MIN_CONSUMPTION = 2.0;
 const MAX_CONSUMPTION = 14.0;
 
+/**
+ * Generates a random number from MIN_CONSUMPTION to MAX_CONSUMPTION
+ * with two decimal points
+ */
+const generateHourConsumption = () => {
+  const consumption =
+    Math.random() * (MAX_CONSUMPTION - MIN_CONSUMPTION) + MIN_CONSUMPTION;
+  return Math.round(consumption * 100) / 100;
+};
+
 export const energyRouter = createTRPCRouter({
   generateRandomEnergy: protectedProcedure
     .input(z.string().nullish())
@@ -25,9 +35,7 @@ export const energyRouter = createTRPCRouter({
             to: new Date(
               startDate + i * 24 * 60 * 60 * 1000 + (j + 1) * 60 * 60 * 1000
             ),
-            consumption:
-              Math.random() * (MAX_CONSUMPTION - MIN_CONSUMPTION) +
-              MIN_CONSUMPTION,
+            consumption: generateHourConsumption(),
             unit: "kWh",
           };
 

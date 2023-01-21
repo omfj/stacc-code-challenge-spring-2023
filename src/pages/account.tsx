@@ -21,7 +21,7 @@ const AccountPage = () => {
       <Head>
         <title>Strømsta — Konto</title>
       </Head>
-      <Profile session={session} />;
+      <Profile session={session} />
     </>
   );
 };

@@ -14,7 +14,8 @@ import { nb } from "date-fns/locale";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { HourlyPrice } from "@/utils/schemas";
-import { hourlyPriceSchema, transformHourlyPrice } from "@/utils/schemas";
+import { hourlyPriceSchema } from "@/utils/schemas";
+import { transformHourlyPrice } from "@/utils/prices";
 import type { ErrorWithMessage } from "@/utils/error";
 import { isErrorWithMessage } from "@/utils/error";
 import Button from "@/components/Button";
@@ -39,11 +40,9 @@ const PricesPage = () => {
 
   useEffect(() => {
     const fetchElectricityPrices = async () => {
-      const { year, month, day } = {
-        year: format(date, "yyyy"),
-        month: format(date, "MM"),
-        day: format(date, "dd"),
-      };
+      const year = format(date, "yyyy");
+      const month = format(date, "MM");
+      const day = format(date, "dd");
 
       const { data, status } = await axios.get<Array<HourlyPrice>>(
         `https://www.hvakosterstrommen.no/api/v1/prices/${year}/${month}-${day}_${region}.json`,
@@ -98,42 +97,39 @@ const PricesPage = () => {
       <Head>
         <title>Strømsta — Sammenligne</title>
       </Head>
-      <h1 className="text-2xl font-bold">Sammenligne-side</h1>
 
-      <select
-        className="rounded-md"
-        onChange={(e) => setRegion(e.target.value)}
-      >
-        <option value="NO1">Øst-Norge</option>
-        <option value="NO2">Sør-Norge</option>
-        <option value="NO3">Midt-Norge</option>
-        <option value="NO4">Nord-Norge</option>
-        <option value="NO5">Vest-Norge</option>
-      </select>
-
-      <div className="my-8 flex items-center">
-        <div className="flex flex-1 gap-2">
-          <Button size="small" onClick={handleBack}>
-            Forrige dag
-          </Button>
-          <Button size="small" onClick={() => setDate(new Date())}>
-            I dag
-          </Button>
-          <Button size="small" onClick={handleForward}>
-            Neste dag
-          </Button>
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col items-center gap-2 sm:flex-row">
+          <p className="text-xl font-bold">Vis priser for:</p>
+          <select
+            className="mx-2 rounded-md py-1"
+            onChange={(e) => setRegion(e.target.value)}
+          >
+            <option value="NO1">Øst-Norge</option>
+            <option value="NO2">Sør-Norge</option>
+            <option value="NO3">Midt-Norge</option>
+            <option value="NO4">Nord-Norge</option>
+            <option value="NO5">Vest-Norge</option>
+          </select>
         </div>
-        <div>
-          <p>
-            Dato:{" "}
-            <span className="font-bold">
-              {format(date, "dd MMM yyyy", { locale: nb })}
-            </span>
-          </p>
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
+          <div className="flex flex-1 gap-2">
+            <Button onClick={handleBack}>Forrige dag</Button>
+            <Button onClick={() => setDate(new Date())}>I dag</Button>
+            <Button onClick={handleForward}>Neste dag</Button>
+          </div>
+          <div>
+            <p>
+              Dato:{" "}
+              <span className="font-bold">
+                {format(date, "dd MMM yyyy", { locale: nb })}
+              </span>
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="my-5 mx-auto">
+      <div className="my-10 mx-auto">
         {isErrorWithMessage(electricityPrices) ? (
           <p>{electricityPrices.message}</p>
         ) : (
@@ -144,15 +140,11 @@ const PricesPage = () => {
               <YAxis yAxisId="right" orientation="right">
                 <Label value="Forbruk" angle={90} />
               </YAxis>
-              <YAxis
-                yAxisId="left"
-                orientation="left"
-                domain={[0, "dataMax + 20"]}
-              >
+              <YAxis yAxisId="left" orientation="left">
                 <Label value="Pris" angle={-90} position="insideLeft" />
               </YAxis>
 
-              <XAxis dataKey="hour" interval={3} />
+              <XAxis dataKey="hour" interval="preserveStartEnd" />
 
               <Tooltip
                 formatter={(value, name) => {
@@ -174,7 +166,6 @@ const PricesPage = () => {
                 name="Forbruk"
                 fill="#8884d8"
               />
-
               <Line
                 yAxisId="left"
                 type="monotone"

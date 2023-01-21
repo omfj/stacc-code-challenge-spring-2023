@@ -79,7 +79,7 @@ const Header = () => {
               return (
                 <li key={`${href}${label}`}>
                   <Link
-                    className={`rounded-lg px-3 py-2 hover:bg-neutral-200 ${
+                    className={`rounded-xl px-3 py-2 transition-colors hover:bg-neutral-200 ${
                       isActive ? "font-bold" : ""
                     }`}
                     href={href}
