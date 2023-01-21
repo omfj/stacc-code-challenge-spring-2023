@@ -19,6 +19,7 @@ import type { ErrorWithMessage } from "@/utils/error";
 import { isErrorWithMessage } from "@/utils/error";
 import Button from "@/components/Button";
 import { api } from "@/utils/api";
+import Head from "next/head";
 
 const PricesPage = () => {
   const [region, setRegion] = useState("NO1");
@@ -94,6 +95,9 @@ const PricesPage = () => {
 
   return (
     <>
+      <Head>
+        <title>Strømsta — Sammenligne</title>
+      </Head>
       <h1 className="text-2xl font-bold">Sammenligne-side</h1>
 
       <select

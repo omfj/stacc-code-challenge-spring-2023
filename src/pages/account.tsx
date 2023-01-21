@@ -1,6 +1,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Profile from "@/components/Profile";
+import Head from "next/head";
 
 const AccountPage = () => {
   const router = useRouter();
@@ -15,7 +16,14 @@ const AccountPage = () => {
     return null;
   }
 
-  return <Profile session={session} />;
+  return (
+    <>
+      <Head>
+        <title>Strømsta — Konto</title>
+      </Head>
+      <Profile session={session} />;
+    </>
+  );
 };
 
 export default AccountPage;
