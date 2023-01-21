@@ -64,7 +64,7 @@ export const energyRouter = createTRPCRouter({
           },
           to: {
             lte: new Date(
-              new Date(input.date).setHours(23, 59, 59, 999)
+              new Date(input.date).setHours(24, 0, 0, 0)
             ).toISOString(),
           },
         },

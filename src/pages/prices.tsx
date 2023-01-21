@@ -18,13 +18,23 @@ import { hourlyPriceSchema, transformHourlyPrice } from "@/utils/schemas";
 import type { ErrorWithMessage } from "@/utils/error";
 import { isErrorWithMessage } from "@/utils/error";
 import Button from "@/components/Button";
+import { api } from "@/utils/api";
 
 const PricesPage = () => {
+  const [region, setRegion] = useState("NO1");
   const [date, setDate] = useState(new Date());
-  const [data, setData] = useState<
-    | Array<{ hour: string; price: number; consumption: number }>
+  const [electricityPrices, setElectricityPrices] = useState<
+    | Array<{
+        hour: string;
+        price: number;
+        consumption: number | null | undefined;
+      }>
     | ErrorWithMessage
   >([]);
+
+  const { data: consumption } = api.energy.getConsumptionByDay.useQuery({
+    date: date,
+  });
 
   useEffect(() => {
     const fetchElectricityPrices = async () => {
@@ -33,10 +43,9 @@ const PricesPage = () => {
         month: format(date, "MM"),
         day: format(date, "dd"),
       };
-      const location = "NO5";
 
       const { data, status } = await axios.get<Array<HourlyPrice>>(
-        `https://www.hvakosterstrommen.no/api/v1/prices/${year}/${month}-${day}_${location}.json`,
+        `https://www.hvakosterstrommen.no/api/v1/prices/${year}/${month}-${day}_${region}.json`,
         {
           validateStatus: (status) => status < 500,
         }
@@ -44,26 +53,28 @@ const PricesPage = () => {
 
       switch (status) {
         case 200:
-          const parsedData = hourlyPriceSchema.array().safeParse(data);
+          const parsedHourlyPrice = hourlyPriceSchema.array().safeParse(data);
 
-          if (!parsedData.success) {
-            setData({
+          if (!parsedHourlyPrice.success) {
+            setElectricityPrices({
               message: "Noe gikk feil.",
             });
             return;
           }
 
-          const prices = transformHourlyPrice(parsedData.data);
-
-          setData(prices);
+          const prices = transformHourlyPrice(
+            parsedHourlyPrice.data,
+            consumption
+          );
+          setElectricityPrices(prices);
           break;
         case 404:
-          setData({
+          setElectricityPrices({
             message: "Ingen priser for denne dagen.",
           });
           break;
         default:
-          setData({
+          setElectricityPrices({
             message: "Noe gikk feil.",
           });
           break;
@@ -71,7 +82,7 @@ const PricesPage = () => {
     };
 
     void fetchElectricityPrices();
-  }, [date]);
+  }, [consumption, date, region]);
 
   const handleBack = () => {
     setDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1));
@@ -84,6 +95,17 @@ const PricesPage = () => {
   return (
     <>
       <h1 className="text-2xl font-bold">Sammenligne-side</h1>
+
+      <select
+        className="rounded-md"
+        onChange={(e) => setRegion(e.target.value)}
+      >
+        <option value="NO1">Øst-Norge</option>
+        <option value="NO2">Sør-Norge</option>
+        <option value="NO3">Midt-Norge</option>
+        <option value="NO4">Nord-Norge</option>
+        <option value="NO5">Vest-Norge</option>
+      </select>
 
       <div className="my-8 flex items-center">
         <div className="flex flex-1 gap-2">
@@ -108,17 +130,21 @@ const PricesPage = () => {
       </div>
 
       <div className="my-5 mx-auto">
-        {isErrorWithMessage(data) ? (
-          <p>{data.message}</p>
+        {isErrorWithMessage(electricityPrices) ? (
+          <p>{electricityPrices.message}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart data={data}>
-              <CartesianGrid strokeDasharray="10 3" />
+            <ComposedChart data={electricityPrices}>
+              <CartesianGrid strokeDasharray="3 3 1" />
 
               <YAxis yAxisId="right" orientation="right">
                 <Label value="Forbruk" angle={90} />
               </YAxis>
-              <YAxis yAxisId="left" orientation="left">
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                domain={[0, "dataMax + 20"]}
+              >
                 <Label value="Pris" angle={-90} position="insideLeft" />
               </YAxis>
 
@@ -139,11 +165,12 @@ const PricesPage = () => {
               />
 
               <Bar
-                name="Forbruk"
-                dataKey="consumption"
                 yAxisId="right"
-                fill="#8b5cf6"
+                dataKey="consumption"
+                name="Forbruk"
+                fill="#8884d8"
               />
+
               <Line
                 yAxisId="left"
                 type="monotone"
