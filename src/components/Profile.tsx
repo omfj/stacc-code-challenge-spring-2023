@@ -52,11 +52,6 @@ const Profile = ({ session }: Props) => {
           her for å generere en et tilfeldig forbruk.
         </p>
       </section>
-
-      <section>
-        <p>Legg til strøm manuelt</p>
-        <input type="date" id="date" name="date" />
-      </section>
     </div>
   );
 };
