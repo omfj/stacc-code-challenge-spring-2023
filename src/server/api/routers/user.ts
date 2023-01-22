@@ -27,6 +27,12 @@ export const userRouter = createTRPCRouter({
       Date.now() - DAYS_TO_GENERATE * 24 * 60 * 60 * 1000
     ).setHours(24, 0, 0, 0);
 
+    await ctx.prisma.consumption.deleteMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
+    });
+
     const items = [];
     for (let i = 0; i < DAYS_TO_GENERATE; i++) {
       for (let j = 0; j < HOURS_IN_DAY; j++) {
