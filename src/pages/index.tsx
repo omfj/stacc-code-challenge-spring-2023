@@ -1,17 +1,17 @@
 import Head from "next/head";
 
-const Home = () => {
+const HomePage = () => {
   return (
     <>
       <Head>
         <title>Strømsta — Hjem</title>
       </Head>
-      <div className="flex flex-col gap-2 text-xl">
+      <div className="flex flex-col gap-2 text-xl font-extralight">
         <div className="flex flex-col">
           <p className="text-4xl">
-            Velkommen til <span className="font-bold">Strømsta</span>!
+            Velkommen til <span className="font-semibold">Strømsta</span>!
           </p>
-          <p className="italic">
+          <p className="font-normal italic">
             Nettsiden som hjelper deg å spare penger på strømregningen!
           </p>
         </div>
@@ -23,12 +23,12 @@ const Home = () => {
           strømforbruket ditt og spare penger på strømregningen. Besøk oss i dag
           for å se hvor mye du kan spare!
         </p>
-        <p className="mt-5 text-sm italic">
-          * Dette er en fiktiv nettside laget som en del av en kodeoppgave.
+        <p className="mt-5 text-sm font-normal italic">
+          ❗Dette er en fiktiv nettside laget som en del av en kodeoppgave.
         </p>
       </div>
     </>
   );
 };
 
-export default Home;
+export default HomePage;

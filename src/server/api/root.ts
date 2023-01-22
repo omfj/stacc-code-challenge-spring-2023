@@ -1,8 +1,8 @@
 import { createTRPCRouter } from "@/server/api/trpc";
-import { energyRouter } from "@/server/api/routers/energy";
+import { userRouter } from "@/server/api/routers/user";
 
 export const appRouter = createTRPCRouter({
-  energy: energyRouter,
+  user: userRouter,
 });
 
 export type AppRouter = typeof appRouter;

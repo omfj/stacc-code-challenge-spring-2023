@@ -9,3 +9,11 @@ export const hourlyPriceSchema = z.object({
 });
 
 export type HourlyPrice = z.infer<typeof hourlyPriceSchema>;
+
+export const EnergyRegion = {
+  NO1: "Øst-Norge",
+  NO2: "Sør-Norge",
+  NO3: "Midt-Norge",
+  NO4: "Nord-Norge",
+  NO5: "Vest-Norge",
+} as const;
