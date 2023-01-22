@@ -21,6 +21,8 @@ export const userRouter = createTRPCRouter({
   /**
    * Generate a random energy usage for the last 50 days. The energy
    * consumption will be random values.
+   *
+   * Using `deleteMany` and `createMany` is faster than looping over `upsert`.
    */
   generateRandomEnergy: protectedProcedure.mutation(async ({ ctx }) => {
     const startDate = new Date(
@@ -33,10 +35,10 @@ export const userRouter = createTRPCRouter({
       },
     });
 
-    const items = [];
+    const consumptionHours = [];
     for (let i = 0; i < DAYS_TO_GENERATE; i++) {
       for (let j = 0; j < HOURS_IN_DAY; j++) {
-        items.push({
+        consumptionHours.push({
           userId: ctx.session.user.id,
           from: new Date(
             startDate + i * 24 * 60 * 60 * 1000 + j * 60 * 60 * 1000
@@ -51,7 +53,7 @@ export const userRouter = createTRPCRouter({
     }
 
     await ctx.prisma.consumption.createMany({
-      data: items,
+      data: consumptionHours,
       skipDuplicates: true,
     });
   }),
