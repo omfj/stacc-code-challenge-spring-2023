@@ -7,6 +7,11 @@ This is my submission for the Stacc Code Challenge Spring 2023.
 This application uses the t3-stack as a template because it reduces the amount
 of time I have to spend setting up the project. Also, it has all the
 great technologies I love, mainly NextJS, TailwindCSS, tRPC and TypeScript.
+The database is hosted on [Planetscale](https://planetscale.com/).
+
+## API
+
+API for energy prices in Norway is provded by [Hva koster strømmen.no](https://www.hvakosterstrommen.no/strompris-api).
 
 ## How to run
 
