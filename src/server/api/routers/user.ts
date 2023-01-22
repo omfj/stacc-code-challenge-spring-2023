@@ -27,9 +27,10 @@ export const userRouter = createTRPCRouter({
       Date.now() - DAYS_TO_GENERATE * 24 * 60 * 60 * 1000
     ).setHours(24, 0, 0, 0);
 
+    const items = [];
     for (let i = 0; i < DAYS_TO_GENERATE; i++) {
       for (let j = 0; j < HOURS_IN_DAY; j++) {
-        const item = {
+        items.push({
           userId: ctx.session.user.id,
           from: new Date(
             startDate + i * 24 * 60 * 60 * 1000 + j * 60 * 60 * 1000
@@ -39,26 +40,14 @@ export const userRouter = createTRPCRouter({
           ),
           consumption: generateHourConsumption(),
           unit: "kWh",
-        };
-
-        /**
-         * If the user already has a consumption that day,
-         * update it with new values.
-         */
-        await ctx.prisma.consumption.upsert({
-          create: item,
-          update: item,
-          where: {
-            from_to: {
-              from: item.from,
-              to: item.to,
-            },
-          },
         });
       }
     }
 
-    return true;
+    await ctx.prisma.consumption.createMany({
+      data: items,
+      skipDuplicates: true,
+    });
   }),
   /**
    * Get the users consumption by date.
