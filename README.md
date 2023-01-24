@@ -15,7 +15,9 @@ API for energy prices in Norway is provded by [Hva koster strømmen.no](https://
 
 ## How to run
 
-To run the application locally follow these steps, or visit [stacc.omfj.no](https://stacc.omfj.no).
+Just [visit the website!](https://stacc.omfj.no)
+
+But if you want to build the app locally follow these steps:
 
 Prerequisites: `git`, `node` (v16.19.x) and `pnpm` (or `yarn` or `npm`)
 
