@@ -26,7 +26,7 @@ interface Props {
   region: string;
 }
 
-const ConsumptionGraph = ({ date, region }: Props) => {
+const CompareGraph = ({ date, region }: Props) => {
   const { data: session } = useSession();
   const [electricityPrices, setElectricityPrices] = useState<
     Array<HourlyPrice> | ErrorWithMessage
@@ -87,7 +87,7 @@ const ConsumptionGraph = ({ date, region }: Props) => {
   return (
     <>
       {isErrorWithMessage(electricityPrices) ? (
-        <p>{electricityPrices.message}</p>
+        <p>❗{electricityPrices.message}</p>
       ) : (
         <>
           <ResponsiveContainer width="100%" height={400}>
@@ -157,4 +157,4 @@ const ConsumptionGraph = ({ date, region }: Props) => {
   );
 };
 
-export default ConsumptionGraph;
+export default CompareGraph;

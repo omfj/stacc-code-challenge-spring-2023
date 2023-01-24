@@ -26,6 +26,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { Role } from "@prisma/client";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -57,3 +58,33 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 });
 
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+/**
+ * Middleware to enforce taht the user is an admin
+ */
+const enforceUserIsAdmin = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  const isAdmin =
+    (
+      await ctx.prisma.user.findUnique({
+        where: {
+          id: ctx.session.user.id,
+        },
+      })
+    )?.role === Role.ADMIN;
+
+  if (!isAdmin) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+export const adminProcedure = t.procedure.use(enforceUserIsAdmin);

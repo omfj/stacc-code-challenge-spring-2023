@@ -11,6 +11,7 @@ interface Props {
 const Profile = ({ session }: Props) => {
   const { data: hoursOfConsumption } =
     api.user.getHoursOfConsumption.useQuery();
+  const { data: isAdmin } = api.user.isAdmin.useQuery();
   const { mutateAsync } = api.user.generateRandomEnergy.useMutation();
 
   const handleGenerateRandomUsage = () => {
@@ -52,6 +53,12 @@ const Profile = ({ session }: Props) => {
           her for å generere en et tilfeldig forbruk.
         </p>
       </section>
+
+      {isAdmin && (
+        <section>
+          <h1>Youre admin</h1>
+        </section>
+      )}
     </div>
   );
 };

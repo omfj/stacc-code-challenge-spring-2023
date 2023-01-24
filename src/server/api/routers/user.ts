@@ -1,19 +1,26 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { Role, Unit } from "@prisma/client";
+import { add, sub } from "date-fns";
 
 // Set random consumption range
 const DAYS_TO_GENERATE = 50;
 const HOURS_IN_DAY = 24;
-const MIN_CONSUMPTION = 2.0;
-const MAX_CONSUMPTION = 14.0;
 
 /**
  * Generates a random number from MIN_CONSUMPTION to MAX_CONSUMPTION
  * with two decimal points
+ *
+ * Early: 2 - 5 kWh
+ * Daytime: 5 - 12 kWh
  */
-const generateHourConsumption = () => {
-  const consumption =
-    Math.random() * (MAX_CONSUMPTION - MIN_CONSUMPTION) + MIN_CONSUMPTION;
+const generateHourConsumption = (date: Date) => {
+  if (date.getHours() < 22 && date.getHours() > 7) {
+    const consumption = Math.random() * (12 - 5) + 5;
+    return Math.round(consumption * 100) / 100;
+  }
+
+  const consumption = Math.random() * (5 - 2) + 2;
   return Math.round(consumption * 100) / 100;
 };
 
@@ -25,9 +32,9 @@ export const userRouter = createTRPCRouter({
    * Using `deleteMany` and `createMany` is faster than looping over `upsert`.
    */
   generateRandomEnergy: protectedProcedure.mutation(async ({ ctx }) => {
-    const startDate = new Date(
-      Date.now() - DAYS_TO_GENERATE * 24 * 60 * 60 * 1000
-    ).setHours(24, 0, 0, 0);
+    const startDate = sub(new Date(), {
+      days: DAYS_TO_GENERATE,
+    }).setHours(24, 0, 0, 0);
 
     await ctx.prisma.consumption.deleteMany({
       where: {
@@ -40,14 +47,21 @@ export const userRouter = createTRPCRouter({
       for (let j = 0; j < HOURS_IN_DAY; j++) {
         consumptionHours.push({
           userId: ctx.session.user.id,
-          from: new Date(
-            startDate + i * 24 * 60 * 60 * 1000 + j * 60 * 60 * 1000
+          from: add(startDate, {
+            days: i,
+            hours: j,
+          }),
+          to: add(startDate, {
+            days: i,
+            hours: j + 1,
+          }),
+          consumption: generateHourConsumption(
+            add(startDate, {
+              days: i,
+              hours: j,
+            })
           ),
-          to: new Date(
-            startDate + i * 24 * 60 * 60 * 1000 + (j + 1) * 60 * 60 * 1000
-          ),
-          consumption: generateHourConsumption(),
-          unit: "kWh",
+          unit: Unit.KWH,
         });
       }
     }
@@ -57,6 +71,7 @@ export const userRouter = createTRPCRouter({
       skipDuplicates: true,
     });
   }),
+
   /**
    * Get the users consumption by date.
    */
@@ -79,6 +94,7 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
+
   /**
    * Get the amount of hours of consumption a user has
    */
@@ -88,5 +104,18 @@ export const userRouter = createTRPCRouter({
         userId: ctx.session.user.id,
       },
     });
+  }),
+
+  /**
+   * Check if user is admin or not
+   */
+  isAdmin: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+    });
+
+    return user?.role === Role.ADMIN;
   }),
 });

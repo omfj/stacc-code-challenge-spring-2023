@@ -4,7 +4,7 @@ import { useState } from "react";
 import { EnergyRegion } from "@/utils/schemas";
 import Button from "@/components/Button";
 import Head from "next/head";
-import CompareGraph from "@/components/ConsumptionGraph";
+import CompareGraph from "@/components/CompareGraph";
 
 const PricesPage = () => {
   const [region, setRegion] = useState("NO1");
