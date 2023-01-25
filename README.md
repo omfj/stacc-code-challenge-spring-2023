@@ -21,6 +21,10 @@ But if you want to build the app locally follow these steps:
 
 Prerequisites: `git`, `node` (v16.19.x) and `pnpm` (or `yarn` or `npm`)
 
+Depending on the setup: `docker` and `docker-compose` might also be required.
+
+### Download and install the repo
+
 1. Clone the repository
 
    ```sh
@@ -34,14 +38,29 @@ Prerequisites: `git`, `node` (v16.19.x) and `pnpm` (or `yarn` or `npm`)
    pnpm install
    ```
 
-3. Create a [GitHub OAuth app](https://github.com/settings/developers)
-4. Paste the credentials in the `.env` file. `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` respectively.
-5. Create a free [Planetscale database](https://planetscale.com/)
-6. Paste the connection URL in the `DATABASE_URL` field.
+### Setting up auth
 
-7. Run the dev environment. If you don't use `pnpm`, replace `pnpm` with
-   whatever package manager.
+1. Create a [GitHub OAuth app](https://github.com/settings/developers)
+2. Paste the credentials in the `.env` file. `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` respectively.
 
-   ```sh
-   pnpm dev
-   ```
+### Database
+
+#### Locally
+
+1. Run `docker-compose up --build` in the root of this directory. This will create a MySQL database locally on your machine.
+2. Make sure the `DATABASE_URL` in your `.env` is correct. It should be `mysql://admin:password@localhost:3306/stacc-energy-challenge`
+
+> Remember to run `docker-compose down` when you're done, so it doesn't occupy any ports that you might need later.
+
+#### With Planetscale
+
+1. Create a free [Planetscale database](https://planetscale.com/)
+2. Paste the connection URL in the `DATABASE_URL` field.
+
+### Running the application
+
+To run the dev environment, use the command below. If you don't use `pnpm`, replace `pnpm` with whatever package manager.
+
+```sh
+pnpm dev
+```

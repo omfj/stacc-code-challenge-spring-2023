@@ -129,7 +129,7 @@ const Header = () => {
         </button>
       </header>
       {menuOpen && (
-        <nav className="px-3 md:hidden">
+        <nav className="px-3">
           <ul className="flex flex-col gap-5">
             {LINKS.map(({ href, label, session }) => {
               const isActive = pathname === href;
@@ -145,6 +145,7 @@ const Header = () => {
                       isActive ? "font-bold" : ""
                     }`}
                     href={href}
+                    onClick={() => isActive && setMenuOpen(false)}
                   >
                     {label}
                   </Link>

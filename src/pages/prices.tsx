@@ -57,6 +57,16 @@ const PricesPage = () => {
 
       <div className="my-10 mx-auto">
         <CompareGraph date={date} region={region} />
+        <p className="font-extralight">
+          Strømpriser levert av{" "}
+          <a
+            className="text-[#116530] underline hover:no-underline"
+            href="https://www.hvakosterstrommen.no/strompris-api"
+          >
+            Hva koster strømmen.no
+          </a>
+          .
+        </p>
         <div className="my-5">
           <p className="font-bold">Hvordan lese grafen:</p>
           <div className="flex flex-col gap-2 font-extralight">
