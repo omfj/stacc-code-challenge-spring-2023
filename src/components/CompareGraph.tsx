@@ -1,13 +1,9 @@
 import { api } from "@/utils/api";
-import type { ErrorWithMessage } from "@/utils/error";
 import { isErrorWithMessage } from "@/utils/error";
-import { transformHourlyPrice } from "@/utils/prices";
-import type { HourlyPrice } from "@/utils/schemas";
-import { hourlyPriceSchema } from "@/utils/schemas";
-import axios from "axios";
+import type { Consumption, HourPrice } from "@prisma/client";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -28,61 +24,31 @@ interface Props {
 
 const CompareGraph = ({ date, region }: Props) => {
   const { data: session } = useSession();
-  const [electricityPrices, setElectricityPrices] = useState<
-    Array<HourlyPrice> | ErrorWithMessage
-  >([]);
-
-  const { data: consumption, refetch } = api.user.getConsumptionByDay.useQuery(
-    { date },
-    {
-      enabled: false,
-    }
-  );
+  const { data: consumption, refetch: refetchConsumption } =
+    api.user.getConsumptionByDay.useQuery(
+      { date },
+      {
+        enabled: false,
+      }
+    );
+  const { data: electricityPrices, refetch: refetchElectricityPrices } =
+    api.elecricity.getByDay.useQuery(
+      {
+        date,
+        region: region as "NO1" | "NO2" | "NO3" | "NO4" | "NO5",
+      },
+      {
+        enabled: false,
+      }
+    );
 
   useEffect(() => {
-    const fetchElectricityPrices = async () => {
-      const year = format(date, "yyyy");
-      const month = format(date, "MM");
-      const day = format(date, "dd");
+    void refetchElectricityPrices();
 
-      const { data, status } = await axios.get<Array<HourlyPrice>>(
-        `https://www.hvakosterstrommen.no/api/v1/prices/${year}/${month}-${day}_${region}.json`,
-        {
-          validateStatus: (status) => status < 500,
-        }
-      );
-
-      switch (status) {
-        case 200:
-          const parsedHourlyPrice = hourlyPriceSchema.array().safeParse(data);
-
-          if (!parsedHourlyPrice.success) {
-            setElectricityPrices({
-              message: "Noe gikk feil.",
-            });
-            return;
-          }
-
-          setElectricityPrices(parsedHourlyPrice.data);
-          break;
-        case 404:
-          setElectricityPrices({
-            message: "Ingen priser for denne dagen.",
-          });
-          break;
-        default:
-          setElectricityPrices({
-            message: "Noe gikk feil.",
-          });
-          break;
-      }
-    };
-
-    void fetchElectricityPrices();
     if (session) {
-      void refetch();
+      void refetchConsumption();
     }
-  }, [date, refetch, region, session]);
+  }, [refetchConsumption, refetchElectricityPrices, session, date, region]);
 
   return (
     <>
@@ -92,7 +58,10 @@ const CompareGraph = ({ date, region }: Props) => {
         <>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart
-              data={transformHourlyPrice(electricityPrices, consumption ?? [])}
+              data={transformHourlyPrice(
+                electricityPrices ?? [],
+                consumption ?? []
+              )}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
@@ -155,6 +124,21 @@ const CompareGraph = ({ date, region }: Props) => {
       )}
     </>
   );
+};
+
+const transformHourlyPrice = (
+  hourlyPrices: Array<HourPrice>,
+  consumption: Array<Consumption>
+) => {
+  if (!hourlyPrices) {
+    return [];
+  }
+
+  return hourlyPrices.map((hour, i) => ({
+    hour: format(new Date(hour.timeStart), "'kl' HH:mm"),
+    price: Math.trunc(hour.price * 100),
+    consumption: consumption ? consumption[i]?.consumption : null,
+  }));
 };
 
 export default CompareGraph;

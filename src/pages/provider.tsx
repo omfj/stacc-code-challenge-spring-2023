@@ -28,6 +28,14 @@ const ProviderPage = () => {
               ) : (
                 <div className="flex flex-col gap-3">
                   {provider.plans.map((plan) => {
+                    const feeText = plan.fee ? `${plan.fee} kr` : "Ingen gebyr";
+                    const priceText = plan.price
+                      ? `${plan.price} øre`
+                      : "Spotpris";
+                    const periodText = plan.period
+                      ? `${plan.period} mnd`
+                      : "Ingen periode";
+
                     return (
                       <div
                         className="flex flex-col gap-3 rounded-xl bg-neutral-200 p-5"
@@ -36,11 +44,15 @@ const ProviderPage = () => {
                         <h1 className="mb-1 text-xl font-bold">{plan.title}</h1>
                         <p>{plan.description}</p>
                         <div className="flex gap-2">
-                          <Tag size="small"></Tag>
                           <Tag size="small">
-                            <p></p>
+                            <p>{feeText}</p>
                           </Tag>
-                          <Tag size="small"></Tag>
+                          <Tag size="small">
+                            <p>{periodText}</p>
+                          </Tag>
+                          <Tag size="small">
+                            <p>{priceText}</p>
+                          </Tag>
                         </div>
                       </div>
                     );
