@@ -95,9 +95,9 @@ model Plan {
     title       String
     description String
     PriceModel  PriceModel
-    price       Float?
-    fee         Float?
-    period      Int?
+    price       Float
+    fee         Float
+    period      Int
     provider    Provider   @relation(fields: [providerId], references: [id])
     providerId  String
 

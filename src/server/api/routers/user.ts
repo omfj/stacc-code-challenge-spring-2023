@@ -92,6 +92,30 @@ export const userRouter = createTRPCRouter({
             ).toISOString(),
           },
         },
+        orderBy: {
+          from: "asc",
+        },
+      });
+    }),
+
+  getLastNDaysOfConsumption: protectedProcedure
+    .input(z.object({ days: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.consumption.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          from: {
+            gte: sub(new Date().setHours(24, 0, 0, 0), {
+              days: input.days,
+            }).toISOString(),
+          },
+          to: {
+            lte: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
+          },
+        },
+        orderBy: {
+          from: "asc",
+        },
       });
     }),
 

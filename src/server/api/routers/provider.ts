@@ -1,15 +1,9 @@
 import {
+  adminProcedure,
   createTRPCRouter,
-  protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import {
-  Consumption,
-  Plan,
-  PriceModel,
-  Prisma,
-  Provider,
-} from "@prisma/client";
+import { z } from "zod";
 
 export const providerRouter = createTRPCRouter({
   /**
@@ -24,33 +18,19 @@ export const providerRouter = createTRPCRouter({
   }),
 
   /**
-   * Calculates the best provider for a user
+   * Creates a new provider
    */
-  getBestPrice: protectedProcedure.query(async ({ ctx }) => {
-    const userConsumption = await ctx.prisma.consumption.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-    });
-
-    const providers = await ctx.prisma.provider.findMany({
-      include: {
-        plans: true,
-      },
-    });
-  }),
+  createProvider: adminProcedure
+    .input(
+      z.object({
+        name: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.provider.create({
+        data: {
+          name: input.name,
+        },
+      });
+    }),
 });
-
-const calulateTotalPlanPrice = (
-  plan: Plan,
-  consumption: Array<Consumption>
-): number => {
-  switch (plan.PriceModel) {
-    case PriceModel.FIXED:
-      return 30 * (plan.price ?? 0);
-    case PriceModel.SPOT:
-      return 0;
-    case PriceModel.VARIABLE:
-      return 0;
-  }
-};

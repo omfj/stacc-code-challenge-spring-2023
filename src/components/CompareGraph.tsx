@@ -3,7 +3,7 @@ import { isErrorWithMessage } from "@/utils/error";
 import type { Consumption, HourPrice } from "@prisma/client";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -23,6 +23,10 @@ interface Props {
 }
 
 const CompareGraph = ({ date, region }: Props) => {
+  const [totalConsumption, setTotalConsumption] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [averagePrice, setAveragePrice] = useState(0);
+
   const { data: session } = useSession();
   const { data: consumption, refetch: refetchConsumption } =
     api.user.getConsumptionByDay.useQuery(
@@ -49,6 +53,41 @@ const CompareGraph = ({ date, region }: Props) => {
       void refetchConsumption();
     }
   }, [refetchConsumption, refetchElectricityPrices, session, date, region]);
+
+  useEffect(() => {
+    if (consumption) {
+      const total = consumption.reduce(
+        (acc, curr) => acc + curr.consumption,
+        0
+      );
+
+      setTotalConsumption(total);
+    }
+
+    if (electricityPrices) {
+      if (isErrorWithMessage(electricityPrices)) {
+        return;
+      }
+
+      if (!consumption) {
+        return;
+      }
+
+      const totalSpotPrice = electricityPrices.reduce(
+        (acc, curr) => acc + curr.price,
+        0
+      );
+      setAveragePrice(totalSpotPrice / electricityPrices.length);
+
+      const total = electricityPrices
+        .map((hour, i) => {
+          return hour.price * (consumption[i]?.consumption ?? 0);
+        })
+        .reduce((acc, curr) => acc + curr, 0);
+
+      setTotalPrice(total);
+    }
+  }, [consumption, electricityPrices]);
 
   return (
     <>
@@ -119,6 +158,26 @@ const CompareGraph = ({ date, region }: Props) => {
             <p className="text-sm">
               ❗Logg inn for å også se forbruket ditt denne dagen.
             </p>
+          )}
+          {session && (
+            <div>
+              <p>
+                Gjennomsnitts pris per time for denne dagen:{" "}
+                <span className="font-bold">
+                  kr {averagePrice.toFixed(2)}/kWh
+                </span>
+              </p>
+              <p>
+                Total forbruk denne dagen:{" "}
+                <span className="font-bold">
+                  {totalConsumption.toFixed(0)} kWh
+                </span>
+              </p>
+              <p>
+                Total pris denne dagen:{" "}
+                <span className="font-bold">kr {totalPrice.toFixed(2)}</span>
+              </p>
+            </div>
           )}
         </>
       )}

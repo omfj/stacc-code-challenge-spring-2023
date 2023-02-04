@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
 import { useState } from "react";
-import { EnergyRegion } from "@/utils/schemas";
+import { RegionNames } from "@/utils/schemas";
 import Button from "@/components/Button";
 import Head from "next/head";
 import CompareGraph from "@/components/CompareGraph";
@@ -31,7 +31,7 @@ const PricesPage = () => {
             className="mx-2 rounded-md py-1"
             onChange={(e) => setRegion(e.target.value)}
           >
-            {Object.entries(EnergyRegion).map(([key, value]) => (
+            {Object.entries(RegionNames).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
               </option>

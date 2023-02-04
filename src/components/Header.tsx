@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -128,33 +129,40 @@ const Header = () => {
           )}
         </button>
       </header>
-      {menuOpen && (
-        <nav className="px-3">
-          <ul className="flex flex-col gap-5">
-            {LINKS.map(({ href, label, session }) => {
-              const isActive = pathname === href;
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.nav
+            className="px-3"
+            key="mobile-navigation"
+            initial={{ y: -500, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+          >
+            <ul className="flex flex-col gap-5">
+              {LINKS.map(({ href, label, session }) => {
+                const isActive = pathname === href;
 
-              if (session === !userSession) {
-                return null;
-              }
+                if (session === !userSession) {
+                  return null;
+                }
 
-              return (
-                <li key={`${href}${label}`}>
-                  <Link
-                    className={`duration-175 rounded-xl px-3 py-1 text-3xl transition-all hover:ml-3 hover:bg-neutral-200 ${
-                      isActive ? "font-bold" : ""
-                    }`}
-                    href={href}
-                    onClick={() => isActive && setMenuOpen(false)}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      )}
+                return (
+                  <li key={`${href}${label}`}>
+                    <Link
+                      className={`duration-175 rounded-xl px-3 py-1 text-3xl transition-all hover:ml-3 hover:bg-neutral-200 ${
+                        isActive ? "font-bold" : ""
+                      }`}
+                      href={href}
+                      onClick={() => isActive && setMenuOpen(false)}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
