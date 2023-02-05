@@ -101,6 +101,10 @@ Make it easier to add/remove/update providers. Could use an external CMS like Sa
 
 Now all provider plans are in all regions, but realistically they would only be in some of them. So a plan should probably have an `operatingRegion` field with a `PriceRegion[]`.
 
+### Responsiveness
+
+I have made an effort to make the website responsive, but I still don't think the graph looks that good.
+
 ## Screenshots
 
 <table>
