@@ -1,47 +1,11 @@
 import Tag from "@/components/Tag";
 import { api } from "@/utils/api";
-import type { Plan, Provider } from "@prisma/client";
-import { PriceRegion } from "@prisma/client";
-import { PriceModel } from "@prisma/client";
-import { useSession } from "next-auth/react";
-import Head from "next/head";
-import { useEffect, useState } from "react";
 import { isErrorWithMessage } from "@/utils/error";
-import { calculateCost } from "@/lib/provider";
-import { RegionNames } from "@/utils/schemas";
+import { PriceModel } from "@prisma/client";
+import Head from "next/head";
 
-interface Props {
-  providers: Array<
-    Provider & {
-      plans: Array<Plan>;
-    }
-  >;
-}
-
-const ProviderPage = ({ providers }: Props) => {
-  const [region, setRegion] = useState("NO1");
-
-  const { data: session } = useSession();
-  const { data: consumption, refetch } =
-    api.user.getLastNDaysOfConsumption.useQuery(
-      {
-        days: 30,
-      },
-      {
-        enabled: false,
-      }
-    );
-  const { data: electricityPrices } =
-    api.elecricity.getPricesForLastNDays.useQuery({
-      days: 30,
-      region: region as PriceRegion,
-    });
-
-  useEffect(() => {
-    if (session) {
-      void refetch();
-    }
-  }, [refetch, session]);
+const ProviderPage = () => {
+  const { data: providers } = api.provider.all.useQuery();
 
   return (
     <>
@@ -58,19 +22,6 @@ const ProviderPage = ({ providers }: Props) => {
         </div>
       ) : (
         <>
-          <div className="flex flex-col items-center gap-2 sm:flex-row">
-            <p className="text-xl font-bold">Vis priser for:</p>
-            <select
-              className="mx-2 rounded-md py-1"
-              onChange={(e) => setRegion(e.target.value)}
-            >
-              {Object.entries(RegionNames).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
           <div className="flex flex-col gap-3">
             {providers?.map((provider) => (
               <div key={provider.id}>
@@ -94,12 +45,6 @@ const ProviderPage = ({ providers }: Props) => {
                         ? `${plan.period} mnd bindingstid`
                         : "Ingen bindingstid";
 
-                      const estimatedCost = calculateCost(
-                        consumption ?? [],
-                        electricityPrices ?? [],
-                        plan
-                      );
-
                       return (
                         <div
                           className="flex flex-col gap-3 rounded-xl bg-neutral-200 p-5"
@@ -122,16 +67,21 @@ const ProviderPage = ({ providers }: Props) => {
                             </Tag>
                           </div>
 
-                          {session && !isErrorWithMessage(estimatedCost) && (
+                          {plan.estimatedPrice &&
+                            !isErrorWithMessage(plan.estimatedPrice) && (
+                              <p>
+                                Pris siste 30 dager:{" "}
+                                <span className="font-bold">
+                                  {plan.estimatedPrice.toFixed(2)} kr
+                                </span>
+                              </p>
+                            )}
+                          {isErrorWithMessage(plan.estimatedPrice) && (
                             <p>
-                              Pris siste 30 dager:{" "}
                               <span className="font-bold">
-                                {estimatedCost.toFixed(2)} kr
+                                {plan.estimatedPrice.message}
                               </span>
                             </p>
-                          )}
-                          {session && isErrorWithMessage(estimatedCost) && (
-                            <p>{estimatedCost.message}</p>
                           )}
                         </div>
                       );
@@ -145,20 +95,6 @@ const ProviderPage = ({ providers }: Props) => {
       )}
     </>
   );
-};
-
-export const getServerSideProps = async () => {
-  const providers = await prisma?.provider.findMany({
-    include: {
-      plans: true,
-    },
-  });
-
-  return {
-    props: {
-      providers: providers ?? [],
-    },
-  };
 };
 
 export default ProviderPage;

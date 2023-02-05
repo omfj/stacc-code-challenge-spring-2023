@@ -29,7 +29,7 @@ const CompareGraph = ({ date, region }: Props) => {
 
   const { data: session } = useSession();
   const { data: consumption, refetch: refetchConsumption } =
-    api.user.getConsumptionByDay.useQuery(
+    api.consumption.getByDay.useQuery(
       { date },
       {
         enabled: false,

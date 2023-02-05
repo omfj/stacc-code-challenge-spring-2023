@@ -42,6 +42,14 @@ enum Role {
     USER
 }
 
+enum PriceRegion {
+    NO1
+    NO2
+    NO3
+    NO4
+    NO5
+}
+
 model User {
     id            String        @id @default(cuid())
     name          String?
@@ -52,6 +60,7 @@ model User {
     sessions      Session[]
     consumption   Consumption[]
     role          Role          @default(USER)
+    region        PriceRegion   @default(NO1)
 }
 
 model VerificationToken {
@@ -102,14 +111,6 @@ model Plan {
     providerId  String
 
     @@index([providerId])
-}
-
-enum PriceRegion {
-    NO1
-    NO2
-    NO3
-    NO4
-    NO5
 }
 
 model ElectrictyInfo {

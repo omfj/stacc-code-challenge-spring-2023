@@ -1,3 +1,4 @@
+import type { PriceRegion } from "@prisma/client";
 import type { Session } from "next-auth";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
@@ -9,17 +10,30 @@ interface Props {
 }
 
 const Profile = ({ session }: Props) => {
-  const { data: hoursOfConsumption } =
-    api.user.getHoursOfConsumption.useQuery();
-  const { data: isAdmin } = api.user.isAdmin.useQuery();
-  const { mutateAsync } = api.user.generateRandomEnergy.useMutation();
+  const { data: hoursOfConsumption } = api.consumption.countHours.useQuery();
+  const { data: profile, refetch: refetchProfile } = api.user.info.useQuery();
 
-  const handleGenerateRandomUsage = () => {
-    void toast.promise(mutateAsync(), {
+  const { mutateAsync: mutateAsyncRandomEnergy } =
+    api.consumption.generateRandomEnergy.useMutation();
+  const { mutateAsync: mutateAsyncUpdateProfile } =
+    api.user.update.useMutation();
+
+  const handleGenerateRandomUsage = async () => {
+    await toast.promise(mutateAsyncRandomEnergy(), {
       loading: "Genererer et tilfeldig forbruk...",
       success: "Forbruket er oppdatert.",
       error: "Noe gikk galt.",
     });
+  };
+
+  const handleUpdateProfile = async (region: PriceRegion) => {
+    await toast.promise(mutateAsyncUpdateProfile({ region }), {
+      loading: "Oppdaterer profilen din...",
+      success: "Profilen din er oppdatert.",
+      error: "Noe gikk galt.",
+    });
+
+    await refetchProfile();
   };
 
   return (
@@ -42,21 +56,64 @@ const Profile = ({ session }: Props) => {
         </div>
       </section>
 
+      <section className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold">Min region</h2>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => void handleUpdateProfile("NO1")}
+            intent={profile?.region === "NO1" ? "primary" : "secondary"}
+          >
+            Øst-Norge
+          </Button>
+          <Button
+            onClick={() => void handleUpdateProfile("NO2")}
+            intent={profile?.region === "NO2" ? "primary" : "secondary"}
+          >
+            Sør-Norge
+          </Button>
+          <Button
+            onClick={() => void handleUpdateProfile("NO3")}
+            intent={profile?.region === "NO3" ? "primary" : "secondary"}
+          >
+            Midt-Norge
+          </Button>
+          <Button
+            onClick={() => void handleUpdateProfile("NO4")}
+            intent={profile?.region === "NO4" ? "primary" : "secondary"}
+          >
+            Nord-Norge
+          </Button>
+          <Button
+            onClick={() => void handleUpdateProfile("NO5")}
+            intent={profile?.region === "NO5" ? "primary" : "secondary"}
+          >
+            Vest-Norge
+          </Button>
+        </div>
+        <p className="text-sm italic text-neutral-800">
+          Velg din region for når du skal sammenligne strømleverandører.
+        </p>
+      </section>
+
       <section className=" flex flex-col justify-center gap-3">
-        <p className="text-xl">
+        <h2 className="text-xl">
           <span className="font-bold">Totalt forbruk:</span>{" "}
           {hoursOfConsumption ?? 0} timer
-        </p>
-        <Button onClick={handleGenerateRandomUsage}>Gi meg strøm ⚡</Button>
+        </h2>
+        <div>
+          <Button onClick={() => void handleGenerateRandomUsage()}>
+            Gi meg strøm ⚡
+          </Button>
+        </div>
         <p className="text-sm italic text-neutral-800">
           Siden jeg ikke faktisk kan vite hvor mye strøm du bruker må du trykke
           her for å generere en et tilfeldig forbruk.
         </p>
       </section>
 
-      {isAdmin && (
+      {profile?.role === "ADMIN" && (
         <section>
-          <h1>Youre admin</h1>
+          <h1>You are admin</h1>
         </section>
       )}
     </div>

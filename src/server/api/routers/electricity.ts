@@ -4,10 +4,10 @@ import type { PrismaClient } from "@prisma/client";
 import { PriceRegion } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
-import { format, sub } from "date-fns";
+import { format } from "date-fns";
 import { z } from "zod";
 
-const getElectricityPrices = async (
+export const getElectricityPrices = async (
   date: Date,
   region: PriceRegion,
   prisma: PrismaClient
@@ -94,30 +94,6 @@ export const electricityRouter = createTRPCRouter({
       const { date, region } = input;
 
       return await getElectricityPrices(date, region, ctx.prisma);
-    }),
-
-  /**
-   * Get the electricity prices for a specific month. If the prices are not in
-   * the database, store them in the database.
-   */
-  getPricesForLastNDays: publicProcedure
-    .input(
-      z.object({
-        days: z.number().min(1),
-        region: z.nativeEnum(PriceRegion),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      // TODO: Make functional
-      const promiseArray = [];
-      for (let i = 0; i < input.days; i++) {
-        const date = sub(new Date(), { days: i });
-        promiseArray.push(getElectricityPrices(date, input.region, ctx.prisma));
-      }
-
-      const prices = await Promise.all(promiseArray);
-
-      return prices.flat();
     }),
 });
 
