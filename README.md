@@ -65,7 +65,7 @@ To run the dev environment, use the command below. If you don't use `pnpm`, repl
 pnpm dev
 ```
 
-## What I want to do
+## Notes
 
 ### Show loading when fetching electricity prices
 
@@ -73,4 +73,8 @@ Fetching the electricity prices _CAN_ be slow if you are trying to fetch a price
 
 ### CMS for providers
 
-Make it easier to add/remove/update providers. Could use an external CMS like Sanity, or make my own local. For now you just have to use `pnpm prisma studio` and add one manually.
+Make it easier to add/remove/update providers. Could use an external CMS like Sanity, or make my own local. For now, you just have to use `pnpm prisma studio` and add one manually.
+
+### Different plans for different regions
+
+Now all provider plans are in all regions, but realistically they would only be in some of them. So a plan should probably have an `operatingRegion` field with a `PriceRegion[]`.
