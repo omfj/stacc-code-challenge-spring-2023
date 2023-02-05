@@ -101,7 +101,7 @@ const CompareGraph = ({ date, region }: Props) => {
         </div>
       )}
       {isLoading && !isError && (
-        <div className="my-5 h-10 w-full text-center">
+        <div className="my-5 h-10 text-center">
           <p className="text-xl">Laster inn...</p>
         </div>
       )}
