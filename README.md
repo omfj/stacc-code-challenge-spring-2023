@@ -28,7 +28,7 @@ Depending on the setup: `docker` and `docker-compose` might also be required.
 1. Clone the repository
 
    ```sh
-   git clone git@github.com:omfj/stacc-code-challenge-spring-2023
+   git clone https://github.com/omfj/stacc-code-challenge-spring-2023
    ```
 
 2. `cd` into the directory and install dependencies
@@ -36,6 +36,12 @@ Depending on the setup: `docker` and `docker-compose` might also be required.
    ```sh
    cd stacc-code-challenge-spring-2023
    pnpm install
+   ```
+
+3. Copy `.env.example` to `.env`
+
+   ```sh
+   cp .env.example .env
    ```
 
 ### Setting up auth
@@ -47,7 +53,7 @@ Depending on the setup: `docker` and `docker-compose` might also be required.
 
 #### Locally
 
-1. Run `docker-compose up --build` in the root of this directory. This will create a MySQL database locally on your machine.
+1. Run `docker-compose up --build` in the root of this directory. This will create a docker container with a MySQL database locally on your machine.
 2. Make sure the `DATABASE_URL` in your `.env` is correct. It should be `mysql://admin:password@localhost:3306/stacc-energy-challenge`
 
 > Remember to run `docker-compose down` when you're done, so it doesn't occupy any ports that you might need later.
@@ -61,9 +67,25 @@ Depending on the setup: `docker` and `docker-compose` might also be required.
 
 To run the dev environment, use the command below. If you don't use `pnpm`, replace `pnpm` with whatever package manager.
 
+#### Development mode
+
 ```sh
 pnpm dev
 ```
+
+#### Production "mode"
+
+1. Build the application
+
+   ```sh
+   pnpm build
+   ```
+
+2. Start it
+
+   ```sh
+   pnpm start
+   ```
 
 ## Notes
 
@@ -78,3 +100,29 @@ Make it easier to add/remove/update providers. Could use an external CMS like Sa
 ### Different plans for different regions
 
 Now all provider plans are in all regions, but realistically they would only be in some of them. So a plan should probably have an `operatingRegion` field with a `PriceRegion[]`.
+
+## Screenshots
+
+<table>
+   <tr>
+      <td align="center">
+         <img height="300" src="/assets/stromsta-home.png" />
+         <br>
+         <sub><b>Home page</b></sub>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <img height="300" src="/assets/stromsta-compare.png" />
+         <br>
+         <sub><b>Compare prices</b></sub>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <img height="300" src="/assets/stromsta-profile.png" />
+         <br>
+         <sub><b>Profile page</b></sub>
+      </td>
+   </tr>
+</table>
