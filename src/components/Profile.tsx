@@ -10,7 +10,8 @@ interface Props {
 }
 
 const Profile = ({ session }: Props) => {
-  const { data: hoursOfConsumption } = api.consumption.countHours.useQuery();
+  const { data: hoursOfConsumption, refetch: refetchHours } =
+    api.consumption.countHours.useQuery();
   const { data: profile, refetch: refetchProfile } = api.user.info.useQuery();
 
   const { mutateAsync: mutateAsyncRandomEnergy } =
@@ -24,6 +25,8 @@ const Profile = ({ session }: Props) => {
       success: "Forbruket er oppdatert.",
       error: "Noe gikk galt.",
     });
+
+    await refetchHours();
   };
 
   const handleUpdateProfile = async (region: PriceRegion) => {

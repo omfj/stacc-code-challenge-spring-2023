@@ -35,16 +35,20 @@ const CompareGraph = ({ date, region }: Props) => {
         enabled: false,
       }
     );
-  const { data: electricityPrices, refetch: refetchElectricityPrices } =
-    api.elecricity.getByDay.useQuery(
-      {
-        date,
-        region: region as "NO1" | "NO2" | "NO3" | "NO4" | "NO5",
-      },
-      {
-        enabled: false,
-      }
-    );
+  const {
+    data: electricityPrices,
+    refetch: refetchElectricityPrices,
+    isLoading,
+    isError,
+  } = api.elecricity.getByDay.useQuery(
+    {
+      date,
+      region: region as "NO1" | "NO2" | "NO3" | "NO4" | "NO5",
+    },
+    {
+      enabled: false,
+    }
+  );
 
   useEffect(() => {
     void refetchElectricityPrices();
@@ -91,9 +95,17 @@ const CompareGraph = ({ date, region }: Props) => {
 
   return (
     <>
-      {isErrorWithMessage(electricityPrices) ? (
-        <p>❗{electricityPrices.message}</p>
-      ) : (
+      {(electricityPrices ?? []).length <= 0 && !isLoading && (
+        <div className="my-5 h-10 w-full text-center">
+          <p className="text-xl">❗ Ingen strømpriser for denne dagen</p>
+        </div>
+      )}
+      {isLoading && !isError && (
+        <div className="my-5 h-10 w-full text-center">
+          <p className="text-xl">Laster inn...</p>
+        </div>
+      )}
+      {electricityPrices && (
         <>
           <ResponsiveContainer width="100%" height={400}>
             <ComposedChart

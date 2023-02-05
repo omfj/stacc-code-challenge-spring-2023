@@ -64,3 +64,13 @@ To run the dev environment, use the command below. If you don't use `pnpm`, repl
 ```sh
 pnpm dev
 ```
+
+## What I want to do
+
+### Show loading when fetching electricity prices
+
+Fetching the electricity prices _CAN_ be slow if you are trying to fetch a price that has not been fetched by anyone before you. Once they have been fetched one time, it will be fast. This is, because of caching done on the server.
+
+### CMS for providers
+
+Make it easier to add/remove/update providers. Could use an external CMS like Sanity, or make my own local. For now you just have to use `pnpm prisma studio` and add one manually.

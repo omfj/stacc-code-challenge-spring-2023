@@ -12,11 +12,15 @@ export const getElectricityPrices = async (
   region: PriceRegion,
   prisma: PrismaClient
 ) => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
   const electricityInfo = await prisma.electrictyInfo.findFirst({
     where: {
-      year: date.getFullYear(),
-      month: date.getMonth() + 1,
-      day: date.getDay() + 1,
+      year,
+      month,
+      day,
       region,
     },
     include: {
@@ -32,16 +36,16 @@ export const getElectricityPrices = async (
     return electricityInfo.prices;
   }
 
-  const year = format(date, "yyyy");
-  const month = format(date, "MM");
-  const day = format(date, "dd");
+  const yearStr = format(date, "yyyy");
+  const monthStr = format(date, "MM");
+  const dayStr = format(date, "dd");
 
   /**
    * API requires the date to be in the format of yyyy/MM-dd_region.json
    * Example: https://www.hvakosterstrommen.no/api/v1/prices/2021/01-03_NO2.json
    */
   const { data, status } = await axios.get<Array<HourlyPrice>>(
-    `https://www.hvakosterstrommen.no/api/v1/prices/${year}/${month}-${day}_${region}.json`,
+    `https://www.hvakosterstrommen.no/api/v1/prices/${yearStr}/${monthStr}-${dayStr}_${region}.json`,
     {
       validateStatus: (status) => status < 500,
     }
@@ -57,9 +61,9 @@ export const getElectricityPrices = async (
   return (
     await prisma.electrictyInfo.create({
       data: {
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDay() + 1,
+        year,
+        month,
+        day,
         region,
         prices: { create: transformElectricityPrice(data) },
       },
