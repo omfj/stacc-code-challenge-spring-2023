@@ -2,6 +2,8 @@
 
 This is my submission for the [Stacc Code Challenge Spring 2023](https://github.com/stacc/future-of-fintech-V2023).
 
+edit: I won! 🥳
+
 ## Technology
 
 This application uses the t3-stack as a template because it reduces the amount
