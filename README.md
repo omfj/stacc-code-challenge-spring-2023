@@ -17,7 +17,7 @@ API for energy prices in Norway is provded by [Hva koster strømmen.no](https://
 
 ## How to run
 
-Just [visit the website!](https://stacc.omfj.no)
+Just [visit the website!](https://stacc.omfj.no) (Website is taken down, because I need that free Planetscale thing)
 
 But if you want to build the app locally follow these steps:
 
